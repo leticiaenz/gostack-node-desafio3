@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import Category from './Category';
 
@@ -16,10 +18,10 @@ class Transaction {
   title: string;
 
   @Column()
-  type: 'income' | 'outcome';
+  value: number;
 
   @Column()
-  value: number;
+  type: 'income' | 'outcome';
 
   @Column()
   category_id: string;
@@ -28,8 +30,10 @@ class Transaction {
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
+  @CreateDateColumn()
   created_at: Date;
 
+  @UpdateDateColumn()
   updated_at: Date;
 }
 
