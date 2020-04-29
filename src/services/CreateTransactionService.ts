@@ -1,5 +1,5 @@
 import { getCustomRepository, getRepository } from 'typeorm';
-// import AppError from '../errors/AppError';
+import AppError from '../errors/AppError';
 import Transaction from '../models/Transaction';
 import Category from '../models/Category';
 import TransactionsRepository from '../repositories/TransactionsRepository';
@@ -21,22 +21,43 @@ class CreateTransactionService {
     type,
     category,
   }: Request): Promise<Transaction> {
-    const transactionsRepository = getCustomRepository(TransactionsRepository);
+    const transactionsRepository = getRepository(Transaction);
     const categoriesRepository = getRepository(Category);
 
-    const balance = await transactionsRepository.getBalance();
+    console.log(title);
+    console.log(category);
 
-    if (type === 'outcome' && balance.total < value) {
-      // throw new AppError(
-      //   'Você não tem dinheiro em caixa sufiente para realizar esta ação',
-      // );
+    // const balance = await transactionsRepository.getBalance();
+
+    // if (type === 'outcome' && balance.total < value) {
+    //   throw new AppError(
+    //     'Você não tem dinheiro em caixa sufiente para realizar esta ação',
+    //   );
+    // }
+
+    const checkCategory = await categoriesRepository.findOne({
+      where: { title: category },
+    });
+
+    console.log(checkCategory);
+    let newCategory;
+
+    if (checkCategory) {
+      throw new AppError('Category already used.');
+    } else {
+      newCategory = await categoriesRepository.create({
+        title,
+      });
+      await categoriesRepository.save(newCategory);
     }
+
+    console.log(newCategory);
 
     const transaction = transactionsRepository.create({
       title,
       value,
       type,
-      category,
+      category_id: newCategory.id,
     });
 
     await transactionsRepository.save(transaction);
