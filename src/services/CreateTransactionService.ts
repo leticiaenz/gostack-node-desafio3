@@ -2,7 +2,7 @@ import { getCustomRepository, getRepository } from 'typeorm';
 import AppError from '../errors/AppError';
 import Transaction from '../models/Transaction';
 import Category from '../models/Category';
-import TransactionsRepository from '../repositories/TransactionsRepository';
+// import TransactionsRepository from '../repositories/TransactionsRepository';
 
 interface Request {
   title: string;
@@ -21,43 +21,43 @@ class CreateTransactionService {
     type,
     category,
   }: Request): Promise<Transaction> {
-    const transactionsRepository = getRepository(Transaction);
+    const transactionsRepository = getCustomRepository(Transaction);
     const categoriesRepository = getRepository(Category);
 
-    console.log(title);
-    console.log(category);
+    // console.log(title);
+    // console.log(category);
 
-    // const balance = await transactionsRepository.getBalance();
+    const { total } = await transactionsRepository.getBalance();
 
-    // if (type === 'outcome' && balance.total < value) {
-    //   throw new AppError(
-    //     'Você não tem dinheiro em caixa sufiente para realizar esta ação',
-    //   );
-    // }
+    if (type === 'outcome' && total < value) {
+      throw new AppError(
+        'Você não tem dinheiro em caixa sufiente para realizar esta ação',
+      );
+    }
 
     const checkCategory = await categoriesRepository.findOne({
       where: { title: category },
     });
 
-    console.log(checkCategory);
-    let newCategory;
+    // console.log(checkCategory);
+    // let newCategory;
 
     if (checkCategory) {
       throw new AppError('Category already used.');
     } else {
-      newCategory = await categoriesRepository.create({
-        title,
+      checkCategory = await categoriesRepository.create({
+        title: category,
       });
-      await categoriesRepository.save(newCategory);
+      await categoriesRepository.save(checkCategory);
     }
 
-    console.log(newCategory);
+    // console.log(newCategory);
 
     const transaction = transactionsRepository.create({
       title,
       value,
       type,
-      category_id: newCategory.id,
+      category_id: checkCategory.id,
     });
 
     await transactionsRepository.save(transaction);
