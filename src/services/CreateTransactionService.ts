@@ -2,7 +2,7 @@ import { getCustomRepository, getRepository } from 'typeorm';
 import AppError from '../errors/AppError';
 import Transaction from '../models/Transaction';
 import Category from '../models/Category';
-// import TransactionsRepository from '../repositories/TransactionsRepository';
+import TransactionsRepository from '../repositories/TransactionsRepository';
 
 interface Request {
   title: string;
@@ -21,11 +21,8 @@ class CreateTransactionService {
     type,
     category,
   }: Request): Promise<Transaction> {
-    const transactionsRepository = getCustomRepository(Transaction);
+    const transactionsRepository = getCustomRepository(TransactionsRepository);
     const categoriesRepository = getRepository(Category);
-
-    // console.log(title);
-    // console.log(category);
 
     const { total } = await transactionsRepository.getBalance();
 
@@ -35,29 +32,22 @@ class CreateTransactionService {
       );
     }
 
-    const checkCategory = await categoriesRepository.findOne({
+    let TransactionCategory = await categoriesRepository.findOne({
       where: { title: category },
     });
 
-    // console.log(checkCategory);
-    // let newCategory;
-
-    if (checkCategory) {
-      throw new AppError('Category already used.');
-    } else {
-      checkCategory = await categoriesRepository.create({
+    if (!TransactionCategory) {
+      TransactionCategory = await categoriesRepository.create({
         title: category,
       });
-      await categoriesRepository.save(checkCategory);
+      await categoriesRepository.save(TransactionCategory);
     }
-
-    // console.log(newCategory);
 
     const transaction = transactionsRepository.create({
       title,
       value,
       type,
-      category_id: checkCategory.id,
+      category_id: TransactionCategory.id,
     });
 
     await transactionsRepository.save(transaction);
