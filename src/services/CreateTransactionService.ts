@@ -28,7 +28,7 @@ class CreateTransactionService {
 
     if (type === 'outcome' && total < value) {
       throw new AppError(
-        'Você não tem dinheiro em caixa sufiente para realizar esta ação',
+        'You do not have enough cash to carry out this action',
       );
     }
 
