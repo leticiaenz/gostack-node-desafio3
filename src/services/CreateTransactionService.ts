@@ -22,32 +22,32 @@ class CreateTransactionService {
     category,
   }: Request): Promise<Transaction> {
     const transactionsRepository = getCustomRepository(TransactionsRepository);
-    const categoriesRepository = getRepository(Category);
+    // const categoriesRepository = getRepository(Category);
 
-    const { total } = await transactionsRepository.getBalance();
+    // const { total } = await transactionsRepository.getBalance();
 
-    if (type === 'outcome' && total < value) {
-      throw new AppError(
-        'You do not have enough cash to carry out this action',
-      );
-    }
+    // if (type === 'outcome' && total < value) {
+    //   throw new AppError(
+    //     'You do not have enough cash to carry out this action',
+    //   );
+    // }
 
-    let TransactionCategory = await categoriesRepository.findOne({
-      where: { title: category },
-    });
+    // let TransactionCategory = await categoriesRepository.findOne({
+    //   where: { title: category },
+    // });
 
-    if (!TransactionCategory) {
-      TransactionCategory = await categoriesRepository.create({
-        title: category,
-      });
-      await categoriesRepository.save(TransactionCategory);
-    }
+    // if (!TransactionCategory) {
+    //   TransactionCategory = await categoriesRepository.create({
+    //     title: category,
+    //   });
+    //   await categoriesRepository.save(TransactionCategory);
+    // }
 
     const transaction = transactionsRepository.create({
       title,
       value,
       type,
-      category_id: TransactionCategory.id,
+      // category_id: TransactionCategory.id,
     });
 
     await transactionsRepository.save(transaction);
